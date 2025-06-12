@@ -1,0 +1,45 @@
+[project]
+name = "hexlet-code"
+version = "0.1.0"
+description = "Page analyzer"
+authors = [
+    { name = "Sergey Knyazkov", email = "serg.r88@gmail.com" }
+]
+readme = "README.md"
+requires-python = "~=3.12.9"
+dependencies = [
+    "flask>=3.1.1",
+    "gunicorn>=23.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.13",
+]
+
+[tool.ruff]
+output-format = "concise"
+line-length = 80
+
+[tool.ruff.lint]
+extend-select = [
+    "E", # pycodestyle Errors
+    "F", # Pyflakes Errors
+    "W", # pycodestyle Warnings
+    "C90", # mccabe
+    "I", # isort
+    "B", # flake8-bugbear
+    "COM", # flake8-commas
+    "Q", # flake8-quotes
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "PL", # Pylint
+    "N", # pep8-naming
+]
+preview = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
