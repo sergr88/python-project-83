@@ -9,6 +9,15 @@ lint:
 lint-fix:
 	uv run ruff check --fix
 
+db-up:
+	docker compose -f __env__/dev/compose.yaml up --build -d
+
+db-down:
+	docker compose -f __env__/dev/compose.yaml down
+
+db-logs:
+	docker compose -f __env__/dev/compose.yaml logs -f
+
 dev:
 	uv run flask --debug --app page_analyzer:app run
 

@@ -1,0 +1,17 @@
+networks:
+  page_analyzer:
+    name: page_analyzer
+    driver: bridge
+
+services:
+  db:
+    build:
+      context: ../..
+      dockerfile: __env__/dev/db/Dockerfile
+    image: page_analyzer_db
+    container_name: page_analyzer_db
+    shm_size: 128mb
+    networks:
+      - page_analyzer
+    ports:
+      - "5432:5432"
