@@ -1,12 +1,13 @@
 from urllib import parse as urllib_parse
 
+import requests
 import validators
 
 from page_analyzer import db
 
 
-def make(name):
-    return {'name': name}
+def make(**kwargs):
+    return kwargs
 
 
 def validate(url):
@@ -28,6 +29,14 @@ def save(url):
     urls = db.query(query, parameters={'name': url['name']})
     url['id'] = urls[0].id
     return False
+
+
+def check(url):
+    url = get_one_by_id(url['id'])
+    response = requests.get(url['name'], timeout=10, verify=False)
+    response.raise_for_status()
+    data = {'url_id': url['id'], 'status_code': response.status_code}
+    db.insert(table_name='url_checks', data=data)
 
 
 def get_all():

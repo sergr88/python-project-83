@@ -37,7 +37,7 @@ def urls_show(id):
 
 @app.post('/urls')
 def urls_post():
-    url = models.urls.make(flask.request.form.get('url'))
+    url = models.urls.make(name=flask.request.form.get('url'))
     if not models.urls.validate(url):
         messages = [('danger', 'Некорректный URL')]
         return flask.render_template('index.html', url=url['name'], messages=messages), 422
@@ -53,8 +53,11 @@ def urls_post():
 
 @app.post('/urls/<id>/checks')
 def urls_check(id):
-    url_check = models.url_checks.make(url_id=id)
-    models.url_checks.save(url_check)
+    url = models.urls.make(id=id)
+    try:
+        models.urls.check(url)
+    except Exception:
+        flask.flash('Произошла ошибка при проверке', 'danger')
     return flask.redirect(flask.url_for('urls_show', id=id))
 
 

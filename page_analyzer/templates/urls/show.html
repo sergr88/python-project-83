@@ -44,7 +44,7 @@
         {% for url_check in url_checks %}
           <tr>
             <td>{{ url_check.id }}</td>
-            <td>{{ url_check.status_code or '' }}</td>
+            <td>{{ url_check.status_code }}</td>
             <td>{{ url_check.h1 or '' }}</td>
             <td>{{ url_check.title or '' }}</td>
             <td>{{ url_check.description or '' }}</td>
