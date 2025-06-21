@@ -21,11 +21,11 @@ def urls_index():
 
 @app.route('/urls/<id>')
 def urls_show(id):
-    url = models.urls.get_one(id)
+    url = models.urls.get_one_by_id(id)
     if not url:
         flask.abort(404)
 
-    url_checks = models.url_checks.get_by_url_id(id)
+    url_checks = models.url_checks.get_all_by_url_id(id)
     messages = flask.get_flashed_messages(with_categories=True)
     return flask.render_template(
         'urls/show.html',

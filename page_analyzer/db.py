@@ -9,7 +9,7 @@ dotenv.load_dotenv()
 _ENGINE = sqlalchemy.create_engine(os.environ['DATABASE_URL'])
 
 
-def execute_sql_query(query, parameters=None):
+def query(query, parameters=None):
     with _ENGINE.begin() as connection:
         cursor_result = connection.execute(sqlalchemy.text(query), parameters)
     return cursor_result.mappings().fetchall()

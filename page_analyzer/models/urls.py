@@ -25,7 +25,7 @@ def save(url):
         return True
 
     query = 'SELECT id FROM urls WHERE name = :name;'
-    urls = db.execute_sql_query(query, parameters={'name': url['name']})
+    urls = db.query(query, parameters={'name': url['name']})
     url['id'] = urls[0].id
     return False
 
@@ -41,10 +41,10 @@ def get_all():
              LEFT JOIN url_checks AS c ON u.id = c.url_id
         ORDER BY u.created_at DESC, c.created_at DESC;
     """
-    return db.execute_sql_query(query)
+    return db.query(query)
 
 
-def get_one(id):
+def get_one_by_id(id):
     query = 'SELECT id, name, created_at::date FROM urls WHERE id = :id;'
-    urls = db.execute_sql_query(query, parameters={'id': id})
+    urls = db.query(query, parameters={'id': id})
     return urls[0] if urls else None
