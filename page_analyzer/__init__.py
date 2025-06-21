@@ -1,1 +1,1 @@
-from page_analyzer.app import app  # noqa: F401
+from page_analyzer.app import app
