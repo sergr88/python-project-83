@@ -1,10 +1,8 @@
 import os
-from urllib import parse as urllib_parse
 
 import flask
-import validators
 
-from page_analyzer import lib
+from page_analyzer import models
 
 app = flask.Flask(__name__)
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
@@ -17,42 +15,34 @@ def index():
 
 @app.route('/urls')
 def urls_index():
-    query = 'SELECT id, name, created_at::date FROM urls ORDER BY urls.created_at DESC;'
-    urls = lib.execute_sql_query(query)
+    urls = models.urls.get_all()
     return flask.render_template('urls/index.html', urls=urls)
 
 
 @app.route('/urls/<id>')
 def urls_show(id):
-    query = 'SELECT id, name, created_at::date FROM urls WHERE id = :id;'
-    urls = lib.execute_sql_query(query, parameters={'id': id})
-
-    if not urls:
+    url = models.urls.get_one(id)
+    if not url:
         flask.abort(404)
 
     messages = flask.get_flashed_messages(with_categories=True)
-    return flask.render_template('urls/show.html', url=urls[0], messages=messages)
+    return flask.render_template('urls/show.html', url=url, messages=messages)
 
 
 @app.post('/urls')
 def urls_post():
-    url = flask.request.form.get('url')
-    if not validators.url(url):
+    url = models.urls.make(flask.request.form.get('url'))
+    if not models.urls.validate(url):
         messages = [('danger', 'Некорректный URL')]
-        return flask.render_template('index.html', url=url, messages=messages), 422
+        return flask.render_template('index.html', url=url['name'], messages=messages), 422
 
-    parse_result = urllib_parse.urlparse(url)
-    normalized_url = f'{parse_result.scheme}://{parse_result.hostname}'
-    data = {'name': normalized_url}
-    url_id = lib.insert_if_not_exists(table_name='urls', data=data, constraint='urls_uq')
-    if url_id:
+    normalized_url = models.urls.normalize(url)
+    url_is_new = models.urls.save(normalized_url)
+    if url_is_new:
         flask.flash('Страница успешно добавлена', 'success')
     else:
-        query = 'SELECT id FROM urls WHERE name = :name;'
-        urls = lib.execute_sql_query(query, parameters={'name': normalized_url})
-        url_id = urls[0].id
         flask.flash('Страница уже существует', 'info')
-    return flask.redirect(flask.url_for('urls_show', id=url_id))
+    return flask.redirect(flask.url_for('urls_show', id=normalized_url['id']))
 
 
 @app.errorhandler(404)
