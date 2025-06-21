@@ -31,7 +31,16 @@ def save(url):
 
 
 def get_all():
-    query = 'SELECT id, name, created_at::date FROM urls ORDER BY urls.created_at DESC;'
+    query = """
+        SELECT DISTINCT ON (u.created_at)
+               u.id,
+               u.name,
+               c.created_at::date AS checked_at,
+               c.status_code
+        FROM urls AS u
+             LEFT JOIN url_checks AS c ON u.id = c.url_id
+        ORDER BY u.created_at DESC, c.created_at DESC;
+    """
     return db.execute_sql_query(query)
 
 

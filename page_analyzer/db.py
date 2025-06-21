@@ -15,6 +15,13 @@ def execute_sql_query(query, parameters=None):
     return cursor_result.mappings().fetchall()
 
 
+def insert(table_name, data):
+    metadata = sqlalchemy.MetaData()
+    table = sqlalchemy.Table(table_name, metadata, autoload_with=_ENGINE)
+    with _ENGINE.begin() as connection:
+        connection.execute(sqlalchemy.insert(table), data)
+
+
 def insert_if_not_exists(table_name, data, constraint):
     metadata = sqlalchemy.MetaData()
     table = sqlalchemy.Table(table_name, metadata, autoload_with=_ENGINE)

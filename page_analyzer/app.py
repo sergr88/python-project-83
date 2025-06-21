@@ -25,8 +25,14 @@ def urls_show(id):
     if not url:
         flask.abort(404)
 
+    url_checks = models.url_checks.get_by_url_id(id)
     messages = flask.get_flashed_messages(with_categories=True)
-    return flask.render_template('urls/show.html', url=url, messages=messages)
+    return flask.render_template(
+        'urls/show.html',
+        url=url,
+        url_checks=url_checks,
+        messages=messages,
+    )
 
 
 @app.post('/urls')
@@ -43,6 +49,13 @@ def urls_post():
     else:
         flask.flash('Страница уже существует', 'info')
     return flask.redirect(flask.url_for('urls_show', id=normalized_url['id']))
+
+
+@app.post('/urls/<id>/checks')
+def urls_check(id):
+    url_check = models.url_checks.make(url_id=id)
+    models.url_checks.save(url_check)
+    return flask.redirect(flask.url_for('urls_show', id=id))
 
 
 @app.errorhandler(404)

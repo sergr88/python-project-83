@@ -1,1 +1,1 @@
-from page_analyzer.models import urls
+from page_analyzer.models import url_checks, urls
