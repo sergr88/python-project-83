@@ -1,33 +1,35 @@
 import os
 
 import dotenv
-import sqlalchemy
-from sqlalchemy.dialects import postgresql
+import psycopg2
+from psycopg2.extras import NamedTupleCursor
 
 dotenv.load_dotenv()
-
-_ENGINE = sqlalchemy.create_engine(os.environ['DATABASE_URL'])
+_DATABASE_URL = os.environ['DATABASE_URL']
 
 
 def query(query, parameters=None):
-    with _ENGINE.begin() as connection:
-        cursor_result = connection.execute(sqlalchemy.text(query), parameters)
-    return cursor_result.mappings().fetchall()
+    with (
+        psycopg2.connect(_DATABASE_URL) as connection,
+        connection.cursor(cursor_factory=NamedTupleCursor) as cursor,
+    ):
+        cursor.execute(query, parameters)
+        return cursor.fetchall()
 
 
-def insert(table_name, data):
-    metadata = sqlalchemy.MetaData()
-    table = sqlalchemy.Table(table_name, metadata, autoload_with=_ENGINE)
-    with _ENGINE.begin() as connection:
-        connection.execute(sqlalchemy.insert(table), data)
+def insert(query, parameters=None):
+    with (
+        psycopg2.connect(_DATABASE_URL) as connection,
+        connection.cursor(cursor_factory=NamedTupleCursor) as cursor,
+    ):
+        cursor.execute(query, parameters)
 
 
-def insert_if_not_exists(table_name, data, constraint):
-    metadata = sqlalchemy.MetaData()
-    table = sqlalchemy.Table(table_name, metadata, autoload_with=_ENGINE)
-    with _ENGINE.begin() as connection:
-        statement = (postgresql.insert(table)
-                     .values(data)
-                     .on_conflict_do_nothing(constraint=constraint))
-        primary_key = connection.execute(statement).inserted_primary_key
-        return primary_key.id if primary_key else None
+def insert_if_not_exists(query, parameters):
+    with (
+        psycopg2.connect(_DATABASE_URL) as connection,
+        connection.cursor(cursor_factory=NamedTupleCursor) as cursor,
+    ):
+        cursor.execute(query, parameters)
+        primary_key = cursor.fetchone()
+        return primary_key[0] if primary_key else None

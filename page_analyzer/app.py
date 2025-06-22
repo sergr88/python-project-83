@@ -40,7 +40,9 @@ def urls_post():
     url = models.urls.make(name=flask.request.form.get('url'))
     if not models.urls.validate(url):
         messages = [('danger', 'Некорректный URL')]
-        return flask.render_template('index.html', url=url['name'], messages=messages), 422
+        template = flask.render_template('index.html',
+                                         url=url['name'], messages=messages)
+        return template, 422
 
     normalized_url = models.urls.normalize(url)
     url_is_new = models.urls.save(normalized_url)
@@ -56,6 +58,7 @@ def urls_check(id):
     url = models.urls.make(id=id)
     try:
         models.urls.check(url)
+        flask.flash('Страница успешно проверена', 'success')
     except Exception:
         flask.flash('Произошла ошибка при проверке', 'danger')
     return flask.redirect(flask.url_for('urls_show', id=id))
