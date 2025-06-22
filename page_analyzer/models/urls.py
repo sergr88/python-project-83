@@ -2,6 +2,7 @@ from urllib import parse as urllib_parse
 
 import requests
 import validators
+from bs4 import BeautifulSoup
 
 from page_analyzer import db
 
@@ -33,9 +34,22 @@ def save(url):
 
 def check(url):
     url = get_one_by_id(url['id'])
+
     response = requests.get(url['name'], timeout=10, verify=False)
     response.raise_for_status()
-    data = {'url_id': url['id'], 'status_code': response.status_code}
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    h1 = soup.select_one('html > body h1')
+    title = soup.select_one('html > head > title')
+    description = soup.select_one('html > head > meta[name="description"]')
+
+    data = {
+        'url_id': url['id'],
+        'status_code': response.status_code,
+        'h1': h1.text if h1 else None,
+        'title': title.text if title else None,
+        'description': description.get('content') if description else None,
+    }
     db.insert(table_name='url_checks', data=data)
 
 
